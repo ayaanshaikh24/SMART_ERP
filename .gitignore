@@ -63,3 +63,12 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # Turbo cache
 .turbo
+
+# Agent / Skill configurations and directories
+.agents/
+.claude/
+.kilocode/
+.qwen/
+skills/
+skills-lock.json
+
