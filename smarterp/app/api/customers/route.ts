@@ -50,7 +50,7 @@ export async function POST(req: Request) {
     if (!result.success) {
       return NextResponse.json({ 
         error: 'Invalid customer data', 
-        details: result.error.errors.map(e => e.message).join(', ') 
+        details: result.error.issues.map(e => e.message).join(', ') 
       }, { status: 400 });
     }
 

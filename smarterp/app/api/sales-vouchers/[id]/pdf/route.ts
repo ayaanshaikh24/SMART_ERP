@@ -138,7 +138,7 @@ export async function GET(
     });
 
     // Return the response as a downloadable PDF stream
-    return new Response(pdfBuffer, {
+    return new Response(new Uint8Array(pdfBuffer), {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',

@@ -6,9 +6,7 @@ import { getAuthenticatedUser } from '@/lib/auth';
 const updateStockItemSchema = z.object({
   name: z.string().min(1, 'Item name is required'),
   sku: z.string().min(1, 'SKU is required'),
-  unit: z.enum(['PCS', 'KG', 'BOX', 'LTR'], {
-    errorMap: () => ({ message: 'Unit must be PCS, KG, BOX, or LTR' })
-  }),
+  unit: z.enum(['PCS', 'KG', 'BOX', 'LTR']),
   purchase_price: z.number().min(0, 'Purchase price must be positive'),
   selling_price: z.number().min(0, 'Selling price must be positive'),
   gst_percent: z.number().min(0, 'GST percent must be positive').max(100, 'GST percent cannot exceed 100'),
@@ -62,7 +60,7 @@ export async function PUT(
     if (!result.success) {
       return NextResponse.json({ 
         error: 'Invalid stock item data', 
-        details: result.error.errors.map(e => e.message).join(', ') 
+        details: result.error.issues.map(e => e.message).join(', ') 
       }, { status: 400 });
     }
 
