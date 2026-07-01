@@ -1,0 +1,65 @@
+# Dependency directories
+node_modules/
+jspm_packages/
+web_modules/
+
+# Next.js build and development files
+.next/
+out/
+build/
+dist/
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Environment variables (contains sensitive secrets)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+*.env
+.env.backup
+.env.sample
+
+# IDE / Editor configuration files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.project
+.classpath
+.settings/
+
+# OS-specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Diagnostic reports
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Cache directories
+.npm
+.eslintcache
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Vercel deployment metadata
+.vercel
+
+# Turbo cache
+.turbo
