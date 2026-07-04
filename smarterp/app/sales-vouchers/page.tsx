@@ -1,10 +1,13 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/dashboard-layout';
 import { useAuth } from '@/components/auth-provider';
-import { Plus, Download, Eye, Calendar, User } from 'lucide-react';
+import { useShortcutHandler } from '@/components/shortcut-context';
+import { ShortcutHint } from '@/components/shortcut-hint';
+import { Plus, Download, Eye, Calendar, User, Printer } from 'lucide-react';
 
 interface Voucher {
   id: string;
@@ -27,6 +30,7 @@ interface Customer {
 
 export default function SalesVouchersPage() {
   const { apiFetch } = useAuth();
+  const router = useRouter();
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,6 +43,10 @@ export default function SalesVouchersPage() {
   // Active view modal (to view invoice details in popup)
   const [viewVoucher, setViewVoucher] = useState<any | null>(null);
   const [viewLoading, setViewLoading] = useState(false);
+
+  // Table keyboard navigation
+  const [focusedIndex, setFocusedIndex] = useState(-1);
+  const rowRefs = useRef<(HTMLTableRowElement | null)[]>([]);
 
   const fetchVouchers = async () => {
     setLoading(true);
@@ -117,6 +125,54 @@ export default function SalesVouchersPage() {
     }
   };
 
+  const handleDownloadCurrentPdf = async () => {
+    if (viewVoucher) {
+      await handleDownloadPdf(viewVoucher.id, viewVoucher.invoice_number);
+    }
+  };
+
+  const handlePrintCurrent = async () => {
+    if (viewVoucher) {
+      const res = await apiFetch(`/api/sales-vouchers/${viewVoucher.id}/pdf`);
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const printWindow = window.open(url, '_blank');
+        if (printWindow) {
+          printWindow.onload = () => printWindow.print();
+        }
+        setTimeout(() => window.URL.revokeObjectURL(url), 10000);
+      }
+    }
+  };
+
+  useShortcutHandler('refresh', fetchVouchers);
+  useShortcutHandler('newSalesVoucher', () => router.push('/sales-vouchers/new'));
+  useShortcutHandler('esc', viewVoucher ? () => setViewVoucher(null) : null);
+  useShortcutHandler('downloadPdf', viewVoucher ? handleDownloadCurrentPdf : null);
+  useShortcutHandler('print', viewVoucher ? handlePrintCurrent : null);
+
+  // Table keyboard navigation
+  useShortcutHandler('tableArrowDown', !viewVoucher && vouchers.length > 0 ? () => {
+    setFocusedIndex((prev) => {
+      const next = Math.min(prev + 1, vouchers.length - 1);
+      rowRefs.current[next]?.focus();
+      rowRefs.current[next]?.scrollIntoView({ block: 'nearest' });
+      return next;
+    });
+  } : null);
+  useShortcutHandler('tableArrowUp', !viewVoucher && vouchers.length > 0 ? () => {
+    setFocusedIndex((prev) => {
+      const next = Math.max(prev - 1, 0);
+      rowRefs.current[next]?.focus();
+      rowRefs.current[next]?.scrollIntoView({ block: 'nearest' });
+      return next;
+    });
+  } : null);
+  useShortcutHandler('tableEnter', !viewVoucher && focusedIndex >= 0 ? () => {
+    handleViewDetails(vouchers[focusedIndex].id);
+  } : null);
+
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-6">
@@ -132,6 +188,7 @@ export default function SalesVouchersPage() {
           >
             <Plus className="h-4 w-4" />
             Create Sales Voucher
+            <ShortcutHint keys={['F8']} />
           </Link>
         </div>
 
@@ -202,8 +259,17 @@ export default function SalesVouchersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-800 text-zinc-300">
-                {vouchers.map((voucher) => (
-                  <tr key={voucher.id} className="hover:bg-zinc-900/25 transition-colors">
+                {vouchers.map((voucher, i) => (
+                  <tr
+                    key={voucher.id}
+                    ref={(el) => { rowRefs.current[i] = el; }}
+                    tabIndex={-1}
+                    onClick={() => { setFocusedIndex(i); handleViewDetails(voucher.id); }}
+                    onFocus={() => setFocusedIndex(i)}
+                    className={`transition-colors cursor-pointer ${
+                      i === focusedIndex ? 'bg-zinc-800/40 ring-1 ring-emerald-500/30' : 'hover:bg-zinc-900/25'
+                    }`}
+                  >
                     <td className="p-4 text-zinc-400">
                       {new Date(voucher.created_at).toLocaleDateString()}
                     </td>
@@ -211,9 +277,9 @@ export default function SalesVouchersPage() {
                       {voucher.invoice_number}
                     </td>
                     <td className="p-4 font-semibold text-white">{voucher.customers?.name || 'Deleted Customer'}</td>
-                    <td className="p-4 text-right text-zinc-400">${Number(voucher.total_amount).toFixed(2)}</td>
-                    <td className="p-4 text-right text-zinc-400">${Number(voucher.gst_amount).toFixed(2)}</td>
-                    <td className="p-4 text-right font-bold text-white">${Number(voucher.grand_total).toFixed(2)}</td>
+                    <td className="p-4 text-right text-zinc-400">₹{Number(voucher.total_amount).toFixed(2)}</td>
+                    <td className="p-4 text-right text-zinc-400">₹{Number(voucher.gst_amount).toFixed(2)}</td>
+                    <td className="p-4 text-right font-bold text-white">₹{Number(voucher.grand_total).toFixed(2)}</td>
                     <td className="p-4">
                       <div className="flex items-center justify-center gap-3">
                         <button
@@ -294,9 +360,9 @@ export default function SalesVouchersPage() {
                         <tr key={item.id}>
                           <td className="p-3 font-semibold text-white">{item.stock_items?.name}</td>
                           <td className="p-3 font-mono text-zinc-400 text-xs">{item.stock_items?.sku}</td>
-                          <td className="p-3 text-right text-zinc-300">${Number(item.rate).toFixed(2)}</td>
+                          <td className="p-3 text-right text-zinc-300">₹{Number(item.rate).toFixed(2)}</td>
                           <td className="p-3 text-right text-zinc-400">{item.quantity} {item.stock_items?.unit}</td>
-                          <td className="p-3 text-right text-zinc-200">${Number(item.line_total).toFixed(2)}</td>
+                          <td className="p-3 text-right text-zinc-200">₹{Number(item.line_total).toFixed(2)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -307,15 +373,15 @@ export default function SalesVouchersPage() {
                 <div className="flex flex-col items-end space-y-2 border-t border-zinc-800 pt-4">
                   <div className="flex justify-between w-64 text-sm text-zinc-400">
                     <span>Subtotal:</span>
-                    <span className="text-zinc-200">${Number(viewVoucher.total_amount).toFixed(2)}</span>
+                    <span className="text-zinc-200">₹{Number(viewVoucher.total_amount).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between w-64 text-sm text-zinc-400">
                     <span>Tax (GST):</span>
-                    <span className="text-zinc-200">${Number(viewVoucher.gst_amount).toFixed(2)}</span>
+                    <span className="text-zinc-200">₹{Number(viewVoucher.gst_amount).toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between w-64 border-t border-zinc-800 pt-2 font-bold text-base text-white">
                     <span>Grand Total:</span>
-                    <span className="text-emerald-400">${Number(viewVoucher.grand_total).toFixed(2)}</span>
+                    <span className="text-emerald-400">₹{Number(viewVoucher.grand_total).toFixed(2)}</span>
                   </div>
                 </div>
 
@@ -326,6 +392,7 @@ export default function SalesVouchersPage() {
                     className="px-4 py-2 text-sm font-semibold border border-zinc-800 text-zinc-400 rounded-lg hover:bg-zinc-800 hover:text-white transition-colors"
                   >
                     Close
+                    <ShortcutHint keys={['Esc']} />
                   </button>
                   <button
                     onClick={() => handleDownloadPdf(viewVoucher.id, viewVoucher.invoice_number)}
@@ -333,6 +400,15 @@ export default function SalesVouchersPage() {
                   >
                     <Download className="h-4 w-4" />
                     Download PDF
+                    <ShortcutHint keys={['Alt', 'D']} />
+                  </button>
+                  <button
+                    onClick={handlePrintCurrent}
+                    className="flex items-center gap-2 px-5 py-2 text-sm font-bold bg-zinc-700 hover:bg-zinc-600 text-white rounded-lg shadow-md transition-all"
+                  >
+                    <Printer className="h-4 w-4" />
+                    Print
+                    <ShortcutHint keys={['Alt', 'P']} />
                   </button>
                 </div>
               </div>

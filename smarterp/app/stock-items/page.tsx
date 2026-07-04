@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import DashboardLayout from '@/components/dashboard-layout';
 import { useAuth } from '@/components/auth-provider';
+import { useShortcutHandler } from '@/components/shortcut-context';
+import { ShortcutHint } from '@/components/shortcut-hint';
 import { Search, Plus, Pencil, Trash2, X } from 'lucide-react';
 
 interface StockItem {
@@ -36,6 +38,10 @@ export default function StockItemsPage() {
 
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // Table keyboard navigation
+  const [focusedIndex, setFocusedIndex] = useState(-1);
+  const rowRefs = useRef<(HTMLTableRowElement | null)[]>([]);
 
   const fetchItems = async (query = '') => {
     try {
@@ -127,6 +133,31 @@ export default function StockItemsPage() {
     }
   };
 
+  useShortcutHandler('refresh', fetchItems);
+  useShortcutHandler('addStockItem', openAddModal);
+  useShortcutHandler('esc', modalOpen ? () => setModalOpen(false) : null);
+
+  // Table keyboard navigation
+  useShortcutHandler('tableArrowDown', !modalOpen && items.length > 0 ? () => {
+    setFocusedIndex((prev) => {
+      const next = Math.min(prev + 1, items.length - 1);
+      rowRefs.current[next]?.focus();
+      rowRefs.current[next]?.scrollIntoView({ block: 'nearest' });
+      return next;
+    });
+  } : null);
+  useShortcutHandler('tableArrowUp', !modalOpen && items.length > 0 ? () => {
+    setFocusedIndex((prev) => {
+      const next = Math.max(prev - 1, 0);
+      rowRefs.current[next]?.focus();
+      rowRefs.current[next]?.scrollIntoView({ block: 'nearest' });
+      return next;
+    });
+  } : null);
+  useShortcutHandler('tableEnter', !modalOpen && focusedIndex >= 0 ? () => {
+    openEditModal(items[focusedIndex]);
+  } : null);
+
   const handleDelete = async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this stock item?')) return;
 
@@ -161,6 +192,7 @@ export default function StockItemsPage() {
           >
             <Plus className="h-4 w-4" />
             Add Item
+            <ShortcutHint keys={['F10']} />
           </button>
         </div>
 
@@ -201,15 +233,24 @@ export default function StockItemsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-800 text-zinc-300">
-                {items.map((item) => (
-                  <tr key={item.id} className="hover:bg-zinc-900/25 transition-colors">
+                {items.map((item, i) => (
+                  <tr
+                    key={item.id}
+                    ref={(el) => { rowRefs.current[i] = el; }}
+                    tabIndex={-1}
+                    onClick={() => { setFocusedIndex(i); openEditModal(item); }}
+                    onFocus={() => setFocusedIndex(i)}
+                    className={`transition-colors cursor-pointer ${
+                      i === focusedIndex ? 'bg-zinc-800/40 ring-1 ring-emerald-500/30' : 'hover:bg-zinc-900/25'
+                    }`}
+                  >
                     <td className="p-4 font-mono font-semibold text-emerald-400">{item.sku}</td>
                     <td className="p-4 font-semibold text-white">{item.name}</td>
                     <td className="p-4 text-zinc-400">
                       <span className="bg-zinc-800 px-2 py-1 rounded text-xs">{item.unit}</span>
                     </td>
-                    <td className="p-4 text-right text-zinc-300">${Number(item.purchase_price).toFixed(2)}</td>
-                    <td className="p-4 text-right text-zinc-300">${Number(item.selling_price).toFixed(2)}</td>
+                    <td className="p-4 text-right text-zinc-300">₹{Number(item.purchase_price).toFixed(2)}</td>
+                    <td className="p-4 text-right text-zinc-300">₹{Number(item.selling_price).toFixed(2)}</td>
                     <td className="p-4 text-right text-zinc-400">{Number(item.gst_percent).toFixed(0)}%</td>
                     <td className={`p-4 text-right font-bold ${item.quantity < 10 ? 'text-rose-400' : 'text-emerald-500'}`}>
                       {Number(item.quantity).toFixed(2)}
@@ -316,7 +357,7 @@ export default function StockItemsPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label htmlFor="modal-purchase-price" className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                      Purchase Price ($) *
+                      Purchase Price (₹) *
                     </label>
                     <input
                       id="modal-purchase-price"
@@ -333,7 +374,7 @@ export default function StockItemsPage() {
 
                   <div className="space-y-1">
                     <label htmlFor="modal-selling-price" className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                      Selling Price ($) *
+                      Selling Price (₹) *
                     </label>
                     <input
                       id="modal-selling-price"
@@ -374,6 +415,7 @@ export default function StockItemsPage() {
                   className="px-4 py-2 text-sm font-semibold border border-zinc-800 text-zinc-400 rounded-lg hover:bg-zinc-800 hover:text-white transition-colors"
                 >
                   Cancel
+                  <ShortcutHint keys={['Esc']} />
                 </button>
                 <button
                   type="submit"
@@ -381,6 +423,7 @@ export default function StockItemsPage() {
                   className="px-5 py-2 text-sm font-bold bg-emerald-500 hover:bg-emerald-400 text-zinc-950 rounded-lg shadow-md transition-all disabled:opacity-50"
                 >
                   {submitting ? 'Saving...' : 'Save Stock Item'}
+                  <ShortcutHint keys={['Alt', 'A']} />
                 </button>
               </div>
             </form>

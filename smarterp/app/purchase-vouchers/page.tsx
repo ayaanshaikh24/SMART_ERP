@@ -1,9 +1,12 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/dashboard-layout';
 import { useAuth } from '@/components/auth-provider';
+import { useShortcutHandler } from '@/components/shortcut-context';
+import { ShortcutHint } from '@/components/shortcut-hint';
 import { Plus, Eye, Calendar, User } from 'lucide-react';
 
 interface Voucher {
@@ -26,6 +29,7 @@ interface Supplier {
 
 export default function PurchaseVouchersPage() {
   const { apiFetch } = useAuth();
+  const router = useRouter();
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,6 +42,10 @@ export default function PurchaseVouchersPage() {
   // Active view modal
   const [viewVoucher, setViewVoucher] = useState<any | null>(null);
   const [viewLoading, setViewLoading] = useState(false);
+
+  // Table keyboard navigation
+  const [focusedIndex, setFocusedIndex] = useState(-1);
+  const rowRefs = useRef<(HTMLTableRowElement | null)[]>([]);
 
   const fetchVouchers = async () => {
     setLoading(true);
@@ -96,6 +104,31 @@ export default function PurchaseVouchersPage() {
     }
   };
 
+  useShortcutHandler('refresh', fetchVouchers);
+  useShortcutHandler('newPurchaseVoucher', () => router.push('/purchase-vouchers/new'));
+  useShortcutHandler('esc', viewVoucher ? () => setViewVoucher(null) : null);
+
+  // Table keyboard navigation
+  useShortcutHandler('tableArrowDown', !viewVoucher && vouchers.length > 0 ? () => {
+    setFocusedIndex((prev) => {
+      const next = Math.min(prev + 1, vouchers.length - 1);
+      rowRefs.current[next]?.focus();
+      rowRefs.current[next]?.scrollIntoView({ block: 'nearest' });
+      return next;
+    });
+  } : null);
+  useShortcutHandler('tableArrowUp', !viewVoucher && vouchers.length > 0 ? () => {
+    setFocusedIndex((prev) => {
+      const next = Math.max(prev - 1, 0);
+      rowRefs.current[next]?.focus();
+      rowRefs.current[next]?.scrollIntoView({ block: 'nearest' });
+      return next;
+    });
+  } : null);
+  useShortcutHandler('tableEnter', !viewVoucher && focusedIndex >= 0 ? () => {
+    handleViewDetails(vouchers[focusedIndex].id);
+  } : null);
+
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-6">
@@ -111,6 +144,7 @@ export default function PurchaseVouchersPage() {
           >
             <Plus className="h-4 w-4" />
             New Purchase Entry
+            <ShortcutHint keys={['F9']} />
           </Link>
         </div>
 
@@ -181,8 +215,17 @@ export default function PurchaseVouchersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-800 text-zinc-300">
-                {vouchers.map((voucher) => (
-                  <tr key={voucher.id} className="hover:bg-zinc-900/25 transition-colors">
+                {vouchers.map((voucher, i) => (
+                  <tr
+                    key={voucher.id}
+                    ref={(el) => { rowRefs.current[i] = el; }}
+                    tabIndex={-1}
+                    onClick={() => { setFocusedIndex(i); handleViewDetails(voucher.id); }}
+                    onFocus={() => setFocusedIndex(i)}
+                    className={`transition-colors cursor-pointer ${
+                      i === focusedIndex ? 'bg-zinc-800/40 ring-1 ring-emerald-500/30' : 'hover:bg-zinc-900/25'
+                    }`}
+                  >
                     <td className="p-4 text-zinc-400">
                       {new Date(voucher.created_at).toLocaleDateString()}
                     </td>
@@ -190,9 +233,9 @@ export default function PurchaseVouchersPage() {
                       {voucher.id}
                     </td>
                     <td className="p-4 font-semibold text-white">{voucher.suppliers?.name || 'Deleted Supplier'}</td>
-                    <td className="p-4 text-right text-zinc-400">${Number(voucher.total_amount).toFixed(2)}</td>
-                    <td className="p-4 text-right text-zinc-400">${Number(voucher.gst_amount).toFixed(2)}</td>
-                    <td className="p-4 text-right font-bold text-white">${Number(voucher.grand_total).toFixed(2)}</td>
+                    <td className="p-4 text-right text-zinc-400">₹{Number(voucher.total_amount).toFixed(2)}</td>
+                    <td className="p-4 text-right text-zinc-400">₹{Number(voucher.gst_amount).toFixed(2)}</td>
+                    <td className="p-4 text-right font-bold text-white">₹{Number(voucher.grand_total).toFixed(2)}</td>
                     <td className="p-4">
                       <div className="flex items-center justify-center">
                         <button
@@ -261,9 +304,9 @@ export default function PurchaseVouchersPage() {
                       <tr key={item.id}>
                         <td className="p-3 font-semibold text-white">{item.stock_items?.name}</td>
                         <td className="p-3 font-mono text-zinc-400 text-xs">{item.stock_items?.sku}</td>
-                        <td className="p-3 text-right text-zinc-300">${Number(item.rate).toFixed(2)}</td>
+                        <td className="p-3 text-right text-zinc-300">₹{Number(item.rate).toFixed(2)}</td>
                         <td className="p-3 text-right text-zinc-400">{item.quantity} {item.stock_items?.unit}</td>
-                        <td className="p-3 text-right text-zinc-200">${Number(item.line_total).toFixed(2)}</td>
+                        <td className="p-3 text-right text-zinc-200">₹{Number(item.line_total).toFixed(2)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -274,24 +317,25 @@ export default function PurchaseVouchersPage() {
               <div className="flex flex-col items-end space-y-2 border-t border-zinc-800 pt-4">
                 <div className="flex justify-between w-64 text-sm text-zinc-400">
                   <span>Subtotal (Excl. GST):</span>
-                  <span className="text-zinc-200">${Number(viewVoucher.total_amount).toFixed(2)}</span>
+                  <span className="text-zinc-200">₹{Number(viewVoucher.total_amount).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between w-64 text-sm text-zinc-400">
                   <span>Tax (GST):</span>
-                  <span className="text-zinc-200">${Number(viewVoucher.gst_amount).toFixed(2)}</span>
+                  <span className="text-zinc-200">₹{Number(viewVoucher.gst_amount).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between w-64 border-t border-zinc-800 pt-2 font-bold text-base text-white">
                   <span>Grand Total:</span>
-                  <span className="text-emerald-400">${Number(viewVoucher.grand_total).toFixed(2)}</span>
+                  <span className="text-emerald-400">₹{Number(viewVoucher.grand_total).toFixed(2)}</span>
                 </div>
               </div>
 
               <div className="flex items-center justify-end gap-3 border-t border-zinc-800 pt-4">
                 <button
                   onClick={() => setViewVoucher(null)}
-                  className="px-5 py-2.5 text-sm font-semibold bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors w-24"
+                  className="px-5 py-2.5 text-sm font-semibold bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors"
                 >
                   Close
+                  <ShortcutHint keys={['Esc']} />
                 </button>
               </div>
             </div>

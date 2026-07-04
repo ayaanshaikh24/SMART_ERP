@@ -1,9 +1,11 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/dashboard-layout';
 import { useAuth } from '@/components/auth-provider';
+import { useShortcutHandler } from '@/components/shortcut-context';
+import { ShortcutHint } from '@/components/shortcut-hint';
 import { Plus, Trash2, ArrowLeft, Save } from 'lucide-react';
 
 interface Supplier {
@@ -47,6 +49,8 @@ export default function NewPurchaseVoucherPage() {
 
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const lastQuantityRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -188,6 +192,34 @@ export default function NewPurchaseVoucherPage() {
     }
   };
 
+  const isDirty = selectedSupplierId !== '' || items.some(i => i.stock_item_id !== '');
+
+  const handleEsc = useCallback(() => {
+    if (isDirty) {
+      if (window.confirm('Discard changes and go back?')) {
+        router.back();
+      }
+    } else {
+      router.back();
+    }
+  }, [isDirty, router]);
+
+  useShortcutHandler('save', () => {
+    formRef.current?.requestSubmit();
+  });
+  useShortcutHandler('esc', handleEsc);
+  useShortcutHandler('lineItemEnter', () => {
+    const active = document.activeElement;
+    if (active && lastQuantityRef.current === active) {
+      handleAddRow();
+      setTimeout(() => {
+        const selects = document.querySelectorAll('select');
+        const lastSelect = selects[selects.length - 1];
+        if (lastSelect) lastSelect.focus();
+      }, 50);
+    }
+  });
+
   if (loading) {
     return (
       <DashboardLayout>
@@ -204,10 +236,12 @@ export default function NewPurchaseVoucherPage() {
         {/* Header */}
         <div className="flex items-center gap-4">
           <button
-            onClick={() => router.back()}
-            className="p-2 border border-zinc-800 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-900 transition-colors"
+            onClick={() => handleEsc()}
+            className="p-2 border border-zinc-800 text-zinc-400 hover:text-white rounded-lg hover:bg-zinc-900 transition-colors relative group"
+            title="Close (Esc)"
           >
             <ArrowLeft className="h-4 w-4" />
+            <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity text-[10px] text-zinc-500 whitespace-nowrap">Esc</span>
           </button>
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">New Purchase Voucher</h1>
@@ -221,7 +255,7 @@ export default function NewPurchaseVoucherPage() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
           {/* Main Info Card */}
           <div className="bg-zinc-900/50 border border-zinc-800 p-5 rounded-xl space-y-4">
             <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider">Voucher Header</h3>
@@ -240,7 +274,7 @@ export default function NewPurchaseVoucherPage() {
                   <option value="">-- Choose Supplier --</option>
                   {suppliers.map((s) => (
                     <option key={s.id} value={s.id}>
-                      {s.name} (Bal: ${Number(s.outstanding_balance).toFixed(2)})
+                      {s.name} (Bal: ₹{Number(s.outstanding_balance).toFixed(2)})
                     </option>
                   ))}
                 </select>
@@ -279,7 +313,7 @@ export default function NewPurchaseVoucherPage() {
                 <thead>
                   <tr className="border-b border-zinc-800 text-zinc-500 font-semibold bg-zinc-950/20">
                     <th className="pb-3 w-[45%]">Select Stock Item</th>
-                    <th className="pb-3 text-right w-[15%]">Cost Rate ($)</th>
+                    <th className="pb-3 text-right w-[15%]">Cost Rate (₹)</th>
                     <th className="pb-3 text-right w-[15%]">Quantity</th>
                     <th className="pb-3 text-right w-[10%]">GST %</th>
                     <th className="pb-3 text-right w-[15%]">Amount</th>
@@ -324,6 +358,7 @@ export default function NewPurchaseVoucherPage() {
                       <td className="py-3 pr-4">
                         <div className="flex items-center gap-1.5 bg-zinc-950 border border-zinc-800 rounded-lg px-2 py-0.5">
                           <input
+                            ref={index === items.length - 1 ? lastQuantityRef : undefined}
                             type="number"
                             step="0.01"
                             min="0.01"
@@ -342,7 +377,7 @@ export default function NewPurchaseVoucherPage() {
                         {item.gst_percent}%
                       </td>
                       <td className="py-3 pr-4 text-right font-semibold text-zinc-200">
-                        ${Number(item.quantity * item.rate).toFixed(2)}
+                        ₹{Number(item.quantity * item.rate).toFixed(2)}
                       </td>
                       <td className="py-3 text-center">
                         <button
@@ -370,15 +405,15 @@ export default function NewPurchaseVoucherPage() {
             <div className="w-full md:w-80 bg-zinc-900/50 border border-zinc-800 p-5 rounded-xl space-y-4">
               <div className="flex justify-between text-sm text-zinc-400">
                 <span>Subtotal (Excl. GST):</span>
-                <span>${totals.taxableSubtotal.toFixed(2)}</span>
+                <span>₹{totals.taxableSubtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm text-zinc-400">
                 <span>GST Total:</span>
-                <span>${totals.totalGst.toFixed(2)}</span>
+                <span>₹{totals.totalGst.toFixed(2)}</span>
               </div>
               <div className="flex justify-between font-bold text-lg text-white border-t border-zinc-800 pt-3">
                 <span>Grand Total:</span>
-                <span className="text-emerald-400">${totals.grandTotal.toFixed(2)}</span>
+                <span className="text-emerald-400">₹{totals.grandTotal.toFixed(2)}</span>
               </div>
 
               <button
@@ -388,6 +423,7 @@ export default function NewPurchaseVoucherPage() {
               >
                 <Save className="h-4 w-4" />
                 {submitting ? 'Saving Voucher...' : 'Save Purchase Entry'}
+                <ShortcutHint keys={['Alt', 'A']} />
               </button>
             </div>
           </div>

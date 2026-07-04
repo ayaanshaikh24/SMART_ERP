@@ -4,6 +4,8 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/components/auth-provider';
+import { ShortcutsPanel } from '@/components/shortcuts-panel';
+import { CommandPalette } from '@/components/command-palette';
 import { 
   LayoutDashboard, 
   Users, 
@@ -167,6 +169,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </main>
       </div>
+
+      {/* Keyboard navigation overlays */}
+      <ShortcutsPanel />
+      <CommandPalette />
     </div>
   );
 }

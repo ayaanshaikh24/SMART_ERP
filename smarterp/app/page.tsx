@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import DashboardLayout from '@/components/dashboard-layout';
 import { useAuth } from '@/components/auth-provider';
+import { useShortcutHandler } from '@/components/shortcut-context';
 import { 
   Users, 
   Truck, 
@@ -60,7 +61,7 @@ export default function Dashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       const res = await apiFetch('/api/dashboard');
       if (res.ok) {
@@ -72,11 +73,13 @@ export default function Dashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [apiFetch]);
 
   useEffect(() => {
     fetchDashboardData();
-  }, []);
+  }, [fetchDashboardData]);
+
+  useShortcutHandler('refresh', fetchDashboardData);
 
   const handleDownloadInvoice = async (id: string, invoiceNumber: string) => {
     try {
@@ -214,7 +217,7 @@ export default function Dashboard() {
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
-                      <span className="font-bold text-white text-sm">${Number(sale.grand_total).toFixed(2)}</span>
+                      <span className="font-bold text-white text-sm">₹{Number(sale.grand_total).toFixed(2)}</span>
                       <button
                         onClick={() => handleDownloadInvoice(sale.id, sale.invoice_number)}
                         className="p-1.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
@@ -228,7 +231,7 @@ export default function Dashboard() {
               </div>
             )}
           </div>
-
+ 
           {/* Recent Stock Purchases */}
           <div className="bg-zinc-900 border border-zinc-800 p-5 rounded-xl space-y-4 shadow-lg">
             <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
@@ -253,7 +256,7 @@ export default function Dashboard() {
                         <span className="text-xs text-zinc-500">{new Date(purchase.created_at).toLocaleDateString()}</span>
                       </div>
                     </div>
-                    <span className="font-bold text-white text-sm pr-2">${Number(purchase.grand_total).toFixed(2)}</span>
+                    <span className="font-bold text-white text-sm pr-2">₹{Number(purchase.grand_total).toFixed(2)}</span>
                   </div>
                 ))}
               </div>
