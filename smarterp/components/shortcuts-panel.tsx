@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Keyboard, X } from 'lucide-react';
+import { Zap, X } from 'lucide-react';
 import { useShortcuts } from '@/components/shortcut-context';
 
 interface ShortcutGroup {
@@ -70,16 +70,40 @@ export function ShortcutsPanel() {
 
   return (
     <>
-      {/* Toggle strip (collapsed) */}
+      {/* Toggle pill tab (collapsed) */}
       {!shortcutsPanelOpen && (
         <button
           onClick={() => setShortcutsPanelOpen(true)}
-          className="fixed right-0 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-1.5 bg-zinc-900/90 backdrop-blur-sm border border-zinc-800 border-r-0 rounded-l-xl px-2 py-4 text-zinc-500 hover:text-emerald-300 hover:bg-zinc-800/90 transition-all duration-200 shadow-lg hover:shadow-emerald-500/5 group"
+          className="
+            fixed right-0 top-1/2 -translate-y-1/2 z-40
+            flex flex-col items-center gap-2
+            px-2.5 py-4
+            rounded-l-xl
+            bg-gradient-to-r from-zinc-900/95 to-zinc-900/90
+            border border-zinc-800 border-r-0
+            shadow-[0_4px_24px_rgba(0,0,0,0.5),0_0_0_0_rgba(52,211,153,0)]
+            backdrop-blur-md
+            text-zinc-500
+            transition-all duration-300 ease-out
+            hover:translate-x-[-3px]
+            hover:bg-gradient-to-r hover:from-zinc-800/95 hover:to-zinc-800/90
+            hover:text-emerald-300
+            hover:shadow-[0_8px_32px_rgba(0,0,0,0.6),0_0_20px_rgba(52,211,153,0.08)]
+            hover:border-emerald-500/20
+            active:translate-x-[-1px] active:scale-[0.97]
+            group
+          "
           title="Show Shortcuts (Ctrl+/)"
         >
-          <Keyboard className="h-4 w-4 transition-transform duration-200 group-hover:scale-110 group-hover:drop-shadow-[0_0_6px_rgba(52,211,153,0.3)]" />
+          {/* Emerald accent rail on the left edge */}
+          <span className="absolute left-0 top-3 bottom-3 w-[2.5px] rounded-r-full bg-emerald-500/40 group-hover:bg-emerald-400/70 transition-colors duration-300" />
+
+          {/* Pulsing dot indicator */}
+          <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-emerald-500/30 animate-pulse" />
+
+          <Zap className="h-[18px] w-[18px] transition-all duration-300 group-hover:scale-110 group-hover:drop-shadow-[0_0_8px_rgba(52,211,153,0.35)] group-hover:text-emerald-300" />
           <span
-            className="text-[10px] font-bold uppercase tracking-[0.15em]"
+            className="text-[10px] font-extrabold uppercase tracking-[0.18em] transition-colors duration-300"
             style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}
           >
             Shortcuts
@@ -93,7 +117,7 @@ export function ShortcutsPanel() {
           {/* Header */}
           <div className="flex items-center justify-between px-4 h-14 border-b border-zinc-800 shrink-0 bg-zinc-900/80">
             <div className="flex items-center gap-2.5">
-              <Keyboard className="h-4 w-4 text-emerald-400 drop-shadow-[0_0_6px_rgba(52,211,153,0.2)]" />
+              <Zap className="h-4 w-4 text-emerald-400 drop-shadow-[0_0_6px_rgba(52,211,153,0.2)]" />
               <span className="text-sm font-bold text-zinc-200">Shortcuts</span>
               <span className={kbdClass}>Ctrl+/</span>
             </div>
