@@ -24,6 +24,8 @@ interface ShortcutContextValue {
   registerHandler: (action: ShortcutAction, handler: () => void) => void;
   unregisterHandler: (action: ShortcutAction) => void;
   triggerAction: (action: ShortcutAction) => void;
+  consumePendingIntent: () => ShortcutAction | null;
+  setPendingIntent: (action: ShortcutAction | null) => void;
   shortcutsPanelOpen: boolean;
   setShortcutsPanelOpen: (open: boolean) => void;
   commandPaletteOpen: boolean;
@@ -36,6 +38,7 @@ export function ShortcutProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const handlersRef = useRef<Map<ShortcutAction, () => void>>(new Map());
+  const pendingIntentRef = useRef<ShortcutAction | null>(null);
   const [shortcutsPanelOpen, setShortcutsPanelOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
 
@@ -50,6 +53,16 @@ export function ShortcutProvider({ children }: { children: React.ReactNode }) {
   const triggerAction = useCallback((action: ShortcutAction) => {
     const handler = handlersRef.current.get(action);
     if (handler) handler();
+  }, []);
+
+  const consumePendingIntent = useCallback(() => {
+    const intent = pendingIntentRef.current;
+    pendingIntentRef.current = null;
+    return intent;
+  }, []);
+
+  const setPendingIntent = useCallback((action: ShortcutAction | null) => {
+    pendingIntentRef.current = action;
   }, []);
 
   useEffect(() => {
@@ -101,14 +114,24 @@ export function ShortcutProvider({ children }: { children: React.ReactNode }) {
           }
           case 'F6': {
             e.preventDefault();
-            const addCustomerHandler = handlersRef.current.get('addCustomer');
-            if (addCustomerHandler) addCustomerHandler();
+            const addCustHandler = handlersRef.current.get('addCustomer');
+            if (addCustHandler) {
+              addCustHandler();
+            } else {
+              pendingIntentRef.current = 'addCustomer';
+              router.push('/customers');
+            }
             return;
           }
           case 'F7': {
             e.preventDefault();
-            const addSupplierHandler = handlersRef.current.get('addSupplier');
-            if (addSupplierHandler) addSupplierHandler();
+            const addSuppHandler = handlersRef.current.get('addSupplier');
+            if (addSuppHandler) {
+              addSuppHandler();
+            } else {
+              pendingIntentRef.current = 'addSupplier';
+              router.push('/suppliers');
+            }
             return;
           }
           case 'F8': {
@@ -136,7 +159,12 @@ export function ShortcutProvider({ children }: { children: React.ReactNode }) {
           case 'F10': {
             e.preventDefault();
             const addStockHandler = handlersRef.current.get('addStockItem');
-            if (addStockHandler) addStockHandler();
+            if (addStockHandler) {
+              addStockHandler();
+            } else {
+              pendingIntentRef.current = 'addStockItem';
+              router.push('/stock-items');
+            }
             return;
           }
           case 'Escape': {
@@ -218,6 +246,8 @@ export function ShortcutProvider({ children }: { children: React.ReactNode }) {
         registerHandler,
         unregisterHandler,
         triggerAction,
+        consumePendingIntent,
+        setPendingIntent,
         shortcutsPanelOpen,
         setShortcutsPanelOpen,
         commandPaletteOpen,

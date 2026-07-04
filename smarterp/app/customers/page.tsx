@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import DashboardLayout from '@/components/dashboard-layout';
 import { useAuth } from '@/components/auth-provider';
-import { useShortcutHandler } from '@/components/shortcut-context';
+import { useShortcutHandler, useShortcuts } from '@/components/shortcut-context';
 import { ShortcutHint } from '@/components/shortcut-hint';
 import { Search, Plus, Pencil, Trash2, X } from 'lucide-react';
 
@@ -117,6 +117,15 @@ export default function CustomersPage() {
       setSubmitting(false);
     }
   };
+
+  const { consumePendingIntent } = useShortcuts();
+
+  useEffect(() => {
+    const intent = consumePendingIntent();
+    if (intent === 'addCustomer') {
+      openAddModal();
+    }
+  }, []);
 
   useShortcutHandler('refresh', fetchCustomers);
   useShortcutHandler('addCustomer', openAddModal);

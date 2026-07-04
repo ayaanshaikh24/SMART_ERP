@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search } from 'lucide-react';
-import { useShortcuts } from '@/components/shortcut-context';
+import { useShortcuts, type ShortcutAction } from '@/components/shortcut-context';
 
 interface PaletteEntry {
   id: string;
@@ -14,29 +14,27 @@ interface PaletteEntry {
 
 export function CommandPalette() {
   const router = useRouter();
-  const { commandPaletteOpen, setCommandPaletteOpen, triggerAction } = useShortcuts();
+  const { commandPaletteOpen, setCommandPaletteOpen, triggerAction, setPendingIntent } = useShortcuts();
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  const navigateAndTrigger = useCallback((path: string, action: Parameters<typeof triggerAction>[0]) => {
+  const navigateWithIntent = useCallback((path: string, action: ShortcutAction) => {
+    setPendingIntent(action);
     setCommandPaletteOpen(false);
     router.push(path);
-    setTimeout(() => {
-      triggerAction(action);
-    }, 300);
-  }, [router, setCommandPaletteOpen, triggerAction]);
+  }, [router, setCommandPaletteOpen, setPendingIntent]);
 
   const entries: PaletteEntry[] = [
-    { id: 'dashboard', label: 'Go to Dashboard', keys: ['F1'], action: () => router.push('/') },
+    { id: 'dashboard', label: 'Go to Dashboard', keys: ['F1'], action: () => { router.push('/'); setCommandPaletteOpen(false); } },
     { id: 'customers', label: 'Go to Customer Ledgers', keys: ['F2'], action: () => { router.push('/customers'); setCommandPaletteOpen(false); } },
     { id: 'suppliers', label: 'Go to Supplier Ledgers', keys: ['F3'], action: () => { router.push('/suppliers'); setCommandPaletteOpen(false); } },
     { id: 'stock-items', label: 'Go to Stock Items', keys: ['F4'], action: () => { router.push('/stock-items'); setCommandPaletteOpen(false); } },
     { id: 'sales', label: 'Go to Sales Vouchers', keys: ['F8'], action: () => { router.push('/sales-vouchers'); setCommandPaletteOpen(false); } },
     { id: 'purchases', label: 'Go to Purchase Vouchers', keys: ['F9'], action: () => { router.push('/purchase-vouchers'); setCommandPaletteOpen(false); } },
-    { id: 'add-customer', label: 'Add New Customer', keys: ['F6'], action: () => navigateAndTrigger('/customers', 'addCustomer') },
-    { id: 'add-supplier', label: 'Add New Supplier', keys: ['F7'], action: () => navigateAndTrigger('/suppliers', 'addSupplier') },
-    { id: 'add-stock', label: 'Add New Stock Item', keys: ['F10'], action: () => navigateAndTrigger('/stock-items', 'addStockItem') },
+    { id: 'add-customer', label: 'Add New Customer', keys: ['F6'], action: () => navigateWithIntent('/customers', 'addCustomer') },
+    { id: 'add-supplier', label: 'Add New Supplier', keys: ['F7'], action: () => navigateWithIntent('/suppliers', 'addSupplier') },
+    { id: 'add-stock', label: 'Add New Stock Item', keys: ['F10'], action: () => navigateWithIntent('/stock-items', 'addStockItem') },
     { id: 'refresh', label: 'Refresh Current Page', keys: ['F5'], action: () => { setCommandPaletteOpen(false); triggerAction('refresh'); } },
   ];
 
