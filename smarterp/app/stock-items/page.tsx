@@ -193,11 +193,11 @@ export default function StockItemsPage() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">Stock Items</h1>
-            <p className="text-sm text-zinc-400">View and manage your inventory master catalog and current stock levels</p>
+            <p className="text-sm text-muted-foreground">View and manage your inventory master catalog and current stock levels</p>
           </div>
           <button
             onClick={openAddModal}
-            className="flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-md"
+            className="flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-md"
           >
             <Plus className="h-4 w-4" />
             Add Item
@@ -206,31 +206,31 @@ export default function StockItemsPage() {
         </div>
 
         {/* Controls */}
-        <div className="flex items-center max-w-md bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2">
-          <Search className="h-5 w-5 text-zinc-500 mr-2" />
+        <div className="flex items-center max-w-md bg-muted border border-border rounded-lg px-3 py-2">
+          <Search className="h-5 w-5 text-muted-foreground mr-2" />
           <input
             type="text"
             placeholder="Search by item name or SKU..."
             value={search}
             onChange={handleSearchChange}
-            className="bg-transparent border-0 outline-none text-sm text-white placeholder-zinc-500 w-full focus:ring-0"
+            className="bg-transparent border-0 outline-none text-sm text-foreground placeholder:text-muted-foreground w-full focus:ring-0"
           />
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto rounded-xl border border-zinc-800 bg-zinc-900/50 backdrop-blur-sm">
+        <div className="overflow-x-auto rounded-xl border border-border bg-card/50 backdrop-blur-sm">
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-emerald-500"></div>
             </div>
           ) : items.length === 0 ? (
-            <div className="text-center py-20 text-zinc-500">
+            <div className="text-center py-20 text-muted-foreground">
               No stock items found. Add a new item to your catalog!
             </div>
           ) : (
             <table className="w-full text-left border-collapse text-sm">
               <thead>
-                <tr className="border-b border-zinc-800 text-zinc-400 font-medium bg-zinc-900/30">
+                <tr className="border-b border-border text-muted-foreground font-medium bg-muted/50">
                   <th className="p-4">SKU</th>
                   <th className="p-4">Item Name</th>
                   <th className="p-4">Unit</th>
@@ -241,7 +241,7 @@ export default function StockItemsPage() {
                   <th className="p-4 text-center">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-800 text-zinc-300">
+              <tbody className="divide-y divide-border text-muted-foreground">
                 {items.map((item, i) => (
                   <tr
                     key={item.id}
@@ -250,17 +250,17 @@ export default function StockItemsPage() {
                     onClick={() => { setFocusedIndex(i); openEditModal(item); }}
                     onFocus={() => setFocusedIndex(i)}
                     className={`transition-colors cursor-pointer ${
-                      i === focusedIndex ? 'bg-zinc-800/40 ring-1 ring-emerald-500/30' : 'hover:bg-zinc-900/25'
+                      i === focusedIndex ? 'bg-accent/50 ring-1 ring-emerald-500/30' : 'hover:bg-accent/25'
                     }`}
                   >
                     <td className="p-4 font-mono font-semibold text-emerald-400">{item.sku}</td>
                     <td className="p-4 font-semibold text-white">{item.name}</td>
-                    <td className="p-4 text-zinc-400">
-                      <span className="bg-zinc-800 px-2 py-1 rounded text-xs">{item.unit}</span>
+                    <td className="p-4 text-muted-foreground">
+                      <span className="bg-accent px-2 py-1 rounded text-xs">{item.unit}</span>
                     </td>
-                    <td className="p-4 text-right text-zinc-300">₹{Number(item.purchase_price).toFixed(2)}</td>
-                    <td className="p-4 text-right text-zinc-300">₹{Number(item.selling_price).toFixed(2)}</td>
-                    <td className="p-4 text-right text-zinc-400">{Number(item.gst_percent).toFixed(0)}%</td>
+                    <td className="p-4 text-right text-muted-foreground">₹{Number(item.purchase_price).toFixed(2)}</td>
+                    <td className="p-4 text-right text-muted-foreground">₹{Number(item.selling_price).toFixed(2)}</td>
+                    <td className="p-4 text-right text-muted-foreground">{Number(item.gst_percent).toFixed(0)}%</td>
                     <td className={`p-4 text-right font-bold ${item.quantity < 10 ? 'text-rose-400' : 'text-emerald-500'}`}>
                       {Number(item.quantity).toFixed(2)}
                     </td>
@@ -268,14 +268,14 @@ export default function StockItemsPage() {
                       <div className="flex items-center justify-center gap-3">
                         <button
                           onClick={() => openEditModal(item)}
-                          className="p-1.5 rounded bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700 transition-colors"
-                          title="Edit Item"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item.id)}
-                          className="p-1.5 rounded bg-zinc-800 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                          className="p-1.5 rounded bg-accent text-muted-foreground hover:text-foreground hover:bg-accent/80 transition-colors"
+                            title="Edit Item"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(item.id)}
+                            className="p-1.5 rounded bg-accent text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-colors"
                           title="Delete Item"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -293,14 +293,14 @@ export default function StockItemsPage() {
       {/* Custom Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-xs p-4">
-          <div className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-2xl animate-in fade-in-50 zoom-in-95 duration-150">
-            <div className="flex items-center justify-between p-5 border-b border-zinc-800 bg-zinc-900/50">
-              <h3 className="text-lg font-bold text-white">
+          <div className="w-full max-w-md bg-card border border-border rounded-xl overflow-hidden shadow-2xl animate-in fade-in-50 zoom-in-95 duration-150">
+            <div className="flex items-center justify-between p-5 border-b border-border bg-muted/50">
+              <h3 className="text-lg font-bold text-foreground">
                 {editItem ? 'Edit Stock Item' : 'Add New Stock Item'}
               </h3>
               <button 
                 onClick={() => setModalOpen(false)}
-                className="text-zinc-400 hover:text-white transition-colors"
+                className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -315,7 +315,7 @@ export default function StockItemsPage() {
                 )}
 
                 <div className="space-y-1">
-                  <label htmlFor="modal-name" className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+                  <label htmlFor="modal-name" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Item Name *
                   </label>
                   <input
@@ -325,13 +325,13 @@ export default function StockItemsPage() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Wireless Mouse"
-                    className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-zinc-100 placeholder-zinc-650 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-sm transition-colors"
+                    className="w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-foreground placeholder:text-muted-foreground focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-sm transition-colors"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label htmlFor="modal-sku" className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+                    <label htmlFor="modal-sku" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       SKU (Unique Code) *
                     </label>
                     <input
@@ -341,19 +341,19 @@ export default function StockItemsPage() {
                       value={sku}
                       onChange={(e) => setSku(e.target.value)}
                       placeholder="e.g. MOUSE-001"
-                      className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-zinc-100 placeholder-zinc-650 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-sm transition-colors"
-                    />
-                  </div>
+                    className="w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-foreground placeholder:text-muted-foreground focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-sm transition-colors"
+                      />
+                    </div>
 
-                  <div className="space-y-1">
-                    <label htmlFor="modal-unit" className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                      Stock Unit *
-                    </label>
-                    <select
-                      id="modal-unit"
-                      value={unit}
-                      onChange={(e) => setUnit(e.target.value as any)}
-                      className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-zinc-100 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-sm transition-colors"
+                    <div className="space-y-1">
+                      <label htmlFor="modal-unit" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                        Stock Unit *
+                      </label>
+                      <select
+                        id="modal-unit"
+                        value={unit}
+                        onChange={(e) => setUnit(e.target.value as any)}
+                        className="w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-foreground focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-sm transition-colors"
                     >
                       <option value="PCS">PCS (Pieces)</option>
                       <option value="KG">KG (Kilograms)</option>
@@ -365,7 +365,7 @@ export default function StockItemsPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label htmlFor="modal-purchase-price" className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+                      <label htmlFor="modal-purchase-price" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       Purchase Price (₹) *
                     </label>
                     <input
@@ -377,12 +377,12 @@ export default function StockItemsPage() {
                       value={purchasePrice}
                       onChange={(e) => setPurchasePrice(e.target.value)}
                       placeholder="0.00"
-                      className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-zinc-100 placeholder-zinc-650 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-sm transition-colors"
-                    />
-                  </div>
+                    className="w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-foreground placeholder:text-muted-foreground focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-sm transition-colors"
+                      />
+                    </div>
 
-                  <div className="space-y-1">
-                    <label htmlFor="modal-selling-price" className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+                    <div className="space-y-1">
+                      <label htmlFor="modal-selling-price" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       Selling Price (₹) *
                     </label>
                     <input
@@ -394,13 +394,13 @@ export default function StockItemsPage() {
                       value={sellingPrice}
                       onChange={(e) => setSellingPrice(e.target.value)}
                       placeholder="0.00"
-                      className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-zinc-100 placeholder-zinc-650 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-sm transition-colors"
+                      className="w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-foreground placeholder:text-muted-foreground focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-sm transition-colors"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <label htmlFor="modal-gst" className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+                  <label htmlFor="modal-gst" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     GST Percent (%) *
                   </label>
                   <input
@@ -412,16 +412,16 @@ export default function StockItemsPage() {
                     value={gstPercent}
                     onChange={(e) => setGstPercent(e.target.value)}
                     placeholder="18"
-                    className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-zinc-100 placeholder-zinc-650 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-sm transition-colors"
+                    className="w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-foreground placeholder:text-muted-foreground focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-sm transition-colors"
                   />
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 p-5 border-t border-zinc-800 bg-zinc-900/30">
+              <div className="flex items-center justify-end gap-3 p-5 border-t border-border bg-muted/30">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="px-4 py-2 text-sm font-semibold border border-zinc-800 text-zinc-400 rounded-lg hover:bg-zinc-800 hover:text-white transition-colors"
+                  className="px-4 py-2 text-sm font-semibold border border-border text-muted-foreground rounded-lg hover:bg-accent hover:text-foreground transition-colors"
                 >
                   Cancel
                   <ShortcutHint keys={['Esc']} />
@@ -429,7 +429,7 @@ export default function StockItemsPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 text-sm font-bold bg-emerald-500 hover:bg-emerald-400 text-zinc-950 rounded-lg shadow-md transition-all disabled:opacity-50"
+                  className="px-5 py-2 text-sm font-bold bg-emerald-500 hover:bg-emerald-400 text-white rounded-lg shadow-md transition-all disabled:opacity-50"
                 >
                   {submitting ? 'Saving...' : 'Save Stock Item'}
                   <ShortcutHint keys={['Alt', 'A']} />

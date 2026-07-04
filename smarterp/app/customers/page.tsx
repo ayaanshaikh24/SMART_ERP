@@ -178,11 +178,11 @@ export default function CustomersPage() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">Customer Ledgers</h1>
-            <p className="text-sm text-zinc-400">Manage your business customers and view outstanding account balances</p>
+            <p className="text-sm text-muted-foreground">Manage your business customers and view outstanding account balances</p>
           </div>
           <button
             onClick={openAddModal}
-            className="flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-md"
+            className="flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-md"
           >
             <Plus className="h-4 w-4" />
             Add Customer
@@ -191,31 +191,31 @@ export default function CustomersPage() {
         </div>
 
         {/* Controls */}
-        <div className="flex items-center max-w-md bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2">
-          <Search className="h-5 w-5 text-zinc-500 mr-2" />
+        <div className="flex items-center max-w-md bg-muted border border-border rounded-lg px-3 py-2">
+          <Search className="h-5 w-5 text-muted-foreground mr-2" />
           <input
             type="text"
             placeholder="Search by customer name or mobile..."
             value={search}
             onChange={handleSearchChange}
-            className="bg-transparent border-0 outline-none text-sm text-white placeholder-zinc-500 w-full focus:ring-0"
+            className="bg-transparent border-0 outline-none text-sm text-foreground placeholder:text-muted-foreground w-full focus:ring-0"
           />
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto rounded-xl border border-zinc-800 bg-zinc-900/50 backdrop-blur-sm">
+        <div className="overflow-x-auto rounded-xl border border-border bg-card/50 backdrop-blur-sm">
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-emerald-500"></div>
             </div>
           ) : customers.length === 0 ? (
-            <div className="text-center py-20 text-zinc-500">
+            <div className="text-center py-20 text-muted-foreground">
               No customers found. Try adding a new customer ledger!
             </div>
           ) : (
             <table className="w-full text-left border-collapse text-sm">
               <thead>
-                <tr className="border-b border-zinc-800 text-zinc-400 font-medium bg-zinc-900/30">
+                <tr className="border-b border-border text-muted-foreground font-medium bg-muted/50">
                   <th className="p-4">Name</th>
                   <th className="p-4">Mobile Number</th>
                   <th className="p-4">Address</th>
@@ -223,7 +223,7 @@ export default function CustomersPage() {
                   <th className="p-4 text-center">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-800 text-zinc-300">
+              <tbody className="divide-y divide-border text-muted-foreground">
                 {customers.map((customer, i) => (
                   <tr
                     key={customer.id}
@@ -232,12 +232,12 @@ export default function CustomersPage() {
                     onClick={() => { setFocusedIndex(i); openEditModal(customer); }}
                     onFocus={() => setFocusedIndex(i)}
                     className={`transition-colors cursor-pointer ${
-                      i === focusedIndex ? 'bg-zinc-800/40 ring-1 ring-emerald-500/30' : 'hover:bg-zinc-900/25'
+                      i === focusedIndex ? 'bg-accent/50 ring-1 ring-emerald-500/30' : 'hover:bg-accent/25'
                     }`}
                   >
                     <td className="p-4 font-semibold text-white">{customer.name}</td>
-                    <td className="p-4 text-zinc-400">{customer.mobile || '—'}</td>
-                    <td className="p-4 max-w-xs truncate text-zinc-400" title={customer.address || ''}>
+                      <td className="p-4 text-muted-foreground">{customer.mobile || '—'}</td>
+                    <td className="p-4 max-w-xs truncate text-muted-foreground" title={customer.address || ''}>
                       {customer.address || '—'}
                     </td>
                     <td className={`p-4 text-right font-bold ${customer.outstanding_balance > 0 ? 'text-amber-400' : 'text-emerald-500'}`}>
@@ -247,14 +247,14 @@ export default function CustomersPage() {
                       <div className="flex items-center justify-center gap-3">
                         <button
                           onClick={() => openEditModal(customer)}
-                          className="p-1.5 rounded bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700 transition-colors"
-                          title="Edit Customer"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(customer.id)}
-                          className="p-1.5 rounded bg-zinc-800 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                          className="p-1.5 rounded bg-accent text-muted-foreground hover:text-foreground hover:bg-accent/80 transition-colors"
+                            title="Edit Customer"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(customer.id)}
+                            className="p-1.5 rounded bg-accent text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-colors"
                           title="Delete Customer"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -272,14 +272,14 @@ export default function CustomersPage() {
       {/* Custom Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-xs p-4">
-          <div className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-2xl animate-in fade-in-50 zoom-in-95 duration-150">
-            <div className="flex items-center justify-between p-5 border-b border-zinc-800 bg-zinc-900/50">
-              <h3 className="text-lg font-bold text-white">
+          <div className="w-full max-w-md bg-card border border-border rounded-xl overflow-hidden shadow-2xl animate-in fade-in-50 zoom-in-95 duration-150">
+            <div className="flex items-center justify-between p-5 border-b border-border bg-muted/50">
+              <h3 className="text-lg font-bold text-foreground">
                 {editCustomer ? 'Edit Customer Details' : 'Add New Customer'}
               </h3>
               <button 
                 onClick={() => setModalOpen(false)}
-                className="text-zinc-400 hover:text-white transition-colors"
+                className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -294,7 +294,7 @@ export default function CustomersPage() {
                 )}
 
                 <div className="space-y-1">
-                  <label htmlFor="modal-name" className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+                  <label htmlFor="modal-name" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Full Name *
                   </label>
                   <input
@@ -304,12 +304,12 @@ export default function CustomersPage() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Enter customer name"
-                    className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-zinc-100 placeholder-zinc-600 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-sm transition-colors"
+                    className="w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-foreground placeholder:text-muted-foreground focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-sm transition-colors"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label htmlFor="modal-mobile" className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+                  <label htmlFor="modal-mobile" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Mobile Number
                   </label>
                   <input
@@ -318,12 +318,12 @@ export default function CustomersPage() {
                     value={mobile}
                     onChange={(e) => setMobile(e.target.value)}
                     placeholder="Enter phone number"
-                    className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-zinc-100 placeholder-zinc-600 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-sm transition-colors"
+                    className="w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-foreground placeholder:text-muted-foreground focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-sm transition-colors"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label htmlFor="modal-address" className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+                  <label htmlFor="modal-address" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     Billing Address
                   </label>
                   <textarea
@@ -332,16 +332,16 @@ export default function CustomersPage() {
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     placeholder="Enter customer address details"
-                    className="w-full rounded-lg border border-zinc-800 bg-zinc-950 px-3.5 py-2.5 text-zinc-100 placeholder-zinc-600 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-sm transition-colors resize-none"
+                    className="w-full rounded-lg border border-border bg-background px-3.5 py-2.5 text-foreground placeholder:text-muted-foreground focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-sm transition-colors resize-none"
                   />
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 p-5 border-t border-zinc-800 bg-zinc-900/30">
+              <div className="flex items-center justify-end gap-3 p-5 border-t border-border bg-muted/30">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="px-4 py-2 text-sm font-semibold border border-zinc-800 text-zinc-400 rounded-lg hover:bg-zinc-800 hover:text-white transition-colors"
+                  className="px-4 py-2 text-sm font-semibold border border-border text-muted-foreground rounded-lg hover:bg-accent hover:text-foreground transition-colors"
                 >
                   Cancel
                   <ShortcutHint keys={['Esc']} />
@@ -349,7 +349,7 @@ export default function CustomersPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 text-sm font-bold bg-emerald-500 hover:bg-emerald-400 text-zinc-950 rounded-lg shadow-md transition-all disabled:opacity-50"
+                  className="px-5 py-2 text-sm font-bold bg-emerald-500 hover:bg-emerald-400 text-white rounded-lg shadow-md transition-all disabled:opacity-50"
                 >
                   {submitting ? 'Saving...' : 'Save Customer'}
                   <ShortcutHint keys={['Alt', 'A']} />
