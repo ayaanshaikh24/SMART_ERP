@@ -2,11 +2,37 @@ import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/db';
 import { getAuthenticatedUser } from '@/lib/auth';
 import PDFDocument from 'pdfkit';
+import fs from 'fs';
+import path from 'path';
+
+function ensureHelveticaFonts() {
+  try {
+    const destDir = 'C:\\ROOT\\node_modules\\pdfkit\\js\\data';
+    const destPath = path.join(destDir, 'Helvetica.afm');
+    if (!fs.existsSync(destPath)) {
+      const srcDir = path.join(process.cwd(), 'node_modules', 'pdfkit', 'js', 'data');
+      if (fs.existsSync(srcDir)) {
+        fs.mkdirSync(destDir, { recursive: true });
+        const files = ['Helvetica.afm', 'Helvetica-Bold.afm', 'Helvetica-Oblique.afm', 'Helvetica-BoldOblique.afm'];
+        for (const file of files) {
+          const srcFile = path.join(srcDir, file);
+          const destFile = path.join(destDir, file);
+          if (fs.existsSync(srcFile) && !fs.existsSync(destFile)) {
+            fs.copyFileSync(srcFile, destFile);
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Failed to copy PDFKit fonts:', err);
+  }
+}
 
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  ensureHelveticaFonts();
   // Optional auth: verify JWT
   const user = await getAuthenticatedUser(req);
   if (!user) {
