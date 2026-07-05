@@ -192,7 +192,7 @@ export default function StockItemsPage() {
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">Stock Items</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Stock Items</h1>
             <p className="text-sm text-muted-foreground">View and manage your inventory master catalog and current stock levels</p>
           </div>
           <button
@@ -254,7 +254,7 @@ export default function StockItemsPage() {
                     }`}
                   >
                     <td className="p-4 font-mono font-semibold text-emerald-400">{item.sku}</td>
-                    <td className="p-4 font-semibold text-white">{item.name}</td>
+                    <td className="p-4 font-semibold text-foreground">{item.name}</td>
                     <td className="p-4 text-muted-foreground">
                       <span className="bg-accent px-2 py-1 rounded text-xs">{item.unit}</span>
                     </td>

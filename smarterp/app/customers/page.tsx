@@ -177,7 +177,7 @@ export default function CustomersPage() {
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">Customer Ledgers</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Customer Ledgers</h1>
             <p className="text-sm text-muted-foreground">Manage your business customers and view outstanding account balances</p>
           </div>
           <button
@@ -235,7 +235,7 @@ export default function CustomersPage() {
                       i === focusedIndex ? 'bg-accent/50 ring-1 ring-emerald-500/30' : 'hover:bg-accent/25'
                     }`}
                   >
-                    <td className="p-4 font-semibold text-white">{customer.name}</td>
+                    <td className="p-4 font-semibold text-foreground">{customer.name}</td>
                       <td className="p-4 text-muted-foreground">{customer.mobile || '—'}</td>
                     <td className="p-4 max-w-xs truncate text-muted-foreground" title={customer.address || ''}>
                       {customer.address || '—'}
