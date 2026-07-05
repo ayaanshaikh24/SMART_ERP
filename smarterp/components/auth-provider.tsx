@@ -91,7 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (response.status === 401) {
       logout();
-      throw new Error('Unauthorized session expired');
+      return response;
     }
 
     return response;
