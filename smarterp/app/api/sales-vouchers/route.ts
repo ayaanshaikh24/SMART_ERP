@@ -109,6 +109,11 @@ export async function POST(req: Request) {
     const computedItems = items.map(inputItem => {
       const stockItem = stockItemsMap.get(inputItem.stock_item_id)!;
       
+      // Enforce integer quantities for PCS and BOX units
+      if (['PCS', 'BOX'].includes(stockItem.unit) && !Number.isInteger(inputItem.quantity)) {
+        throw new Error(`Quantity for item "${stockItem.name}" (${stockItem.unit}) must be a whole number.`);
+      }
+
       // Stock check: is there enough stock?
       if (stockItem.quantity < inputItem.quantity) {
         throw new Error(`Insufficient stock for "${stockItem.name}". Available: ${stockItem.quantity} ${stockItem.unit}, Requested: ${inputItem.quantity}`);

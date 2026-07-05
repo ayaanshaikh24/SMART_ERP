@@ -165,9 +165,15 @@ export default function NewSalesVoucherPage() {
     // Check stock quantities client-side before sending
     for (const item of filteredItems) {
       const stockItem = stockItems.find(si => si.id === item.stock_item_id);
-      if (stockItem && stockItem.quantity < item.quantity) {
-        setError(`Insufficient inventory for "${stockItem.name}". Available: ${stockItem.quantity} ${stockItem.unit}, Requested: ${item.quantity}`);
-        return;
+      if (stockItem) {
+        if (['PCS', 'BOX'].includes(stockItem.unit) && !Number.isInteger(Number(item.quantity))) {
+          setError(`Quantity for item "${stockItem.name}" (${stockItem.unit}) must be a whole number.`);
+          return;
+        }
+        if (stockItem.quantity < item.quantity) {
+          setError(`Insufficient inventory for "${stockItem.name}". Available: ${stockItem.quantity} ${stockItem.unit}, Requested: ${item.quantity}`);
+          return;
+        }
       }
     }
 
@@ -370,7 +376,7 @@ export default function NewSalesVoucherPage() {
                           <input
                             ref={index === items.length - 1 ? lastQuantityRef : undefined}
                             type="number"
-                            step="0.01"
+                            step={['PCS', 'BOX'].includes(item.unit) ? '1' : '0.01'}
                             min="0.01"
                             required
                             value={item.quantity || ''}

@@ -162,6 +162,15 @@ export default function NewPurchaseVoucherPage() {
       return;
     }
 
+    // Check whole number validation for PCS and BOX units
+    for (const item of filteredItems) {
+      const stockItem = stockItems.find(si => si.id === item.stock_item_id);
+      if (stockItem && ['PCS', 'BOX'].includes(stockItem.unit) && !Number.isInteger(Number(item.quantity))) {
+        setError(`Quantity for item "${stockItem.name}" (${stockItem.unit}) must be a whole number.`);
+        return;
+      }
+    }
+
     setSubmitting(true);
 
     try {
@@ -360,7 +369,7 @@ export default function NewPurchaseVoucherPage() {
                           <input
                             ref={index === items.length - 1 ? lastQuantityRef : undefined}
                             type="number"
-                            step="0.01"
+                            step={['PCS', 'BOX'].includes(item.unit) ? '1' : '0.01'}
                             min="0.01"
                             required
                             value={item.quantity || ''}
