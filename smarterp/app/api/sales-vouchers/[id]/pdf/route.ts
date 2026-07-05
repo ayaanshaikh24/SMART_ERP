@@ -117,17 +117,17 @@ export async function GET(
       const totalsY = currentY + 30;
       doc.fontSize(10).font('Helvetica').fillColor('#4b5563');
       doc.text('Subtotal (Excl. GST):', 350, totalsY, { width: 120, align: 'right' });
-      doc.text(`$${Number(voucher.total_amount).toFixed(2)}`, 480, totalsY, { width: 70, align: 'right' });
+      doc.text(`Rs. ${Number(voucher.total_amount).toFixed(2)}`, 480, totalsY, { width: 70, align: 'right' });
 
       doc.text('Total GST Amount:', 350, totalsY + 18, { width: 120, align: 'right' });
-      doc.text(`$${Number(voucher.gst_amount).toFixed(2)}`, 480, totalsY + 18, { width: 70, align: 'right' });
+      doc.text(`Rs. ${Number(voucher.gst_amount).toFixed(2)}`, 480, totalsY + 18, { width: 70, align: 'right' });
 
       // Double lines above Grand Total
       doc.strokeColor('#e5e7eb').lineWidth(1).moveTo(350, totalsY + 34).lineTo(555, totalsY + 34).stroke();
       
       doc.fontSize(11).font('Helvetica-Bold').fillColor('#111827');
       doc.text('Grand Total:', 350, totalsY + 40, { width: 120, align: 'right' });
-      doc.text(`$${Number(voucher.grand_total).toFixed(2)}`, 480, totalsY + 40, { width: 70, align: 'right' });
+      doc.text(`Rs. ${Number(voucher.grand_total).toFixed(2)}`, 480, totalsY + 40, { width: 70, align: 'right' });
 
       doc.strokeColor('#111827').lineWidth(1.5).moveTo(350, totalsY + 56).lineTo(555, totalsY + 56).stroke();
 
