@@ -377,7 +377,7 @@ export default function NewSalesVoucherPage() {
                             ref={index === items.length - 1 ? lastQuantityRef : undefined}
                             type="number"
                             step={['PCS', 'BOX'].includes(item.unit) ? '1' : '0.01'}
-                            min="0.01"
+                            min={['PCS', 'BOX'].includes(item.unit) ? '1' : '0.01'}
                             required
                             value={item.quantity || ''}
                             onChange={(e) => handleFieldChange(index, 'quantity', Number(e.target.value))}
